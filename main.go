@@ -73,6 +73,19 @@ func main() {
 		fmt.Println("Error: Image could not be decoded")
 		os.Exit(1)
 	}
+	// fmt.Println(pixels)
 
-	fmt.Println(pixels)
+	// Converting the RGB tuples of pixels into single brightness numbers
+	var brightness [][]int
+	for y := 0; y < len(pixels); y++ {
+		var row []int
+		for _, v := range pixels[y] {
+			var sum = 0
+			sum = (v.R + v.B + v.G) / 3
+			row = append(row, sum)
+		}
+		brightness = append(brightness, row)
+	}
+
+	// fmt.Println(brightness)
 }
