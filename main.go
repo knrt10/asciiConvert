@@ -4,12 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	_ "image/jpeg"
+	"image/jpeg"
 	_ "image/png"
 	"io"
+	"log"
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/nfnt/resize"
 )
 
 type pixel struct {
@@ -40,7 +42,19 @@ func getAndStorePixels(file io.Reader, widthImage int, heightImage int) ([][]pix
 	if err != nil {
 		return nil, err
 	}
-	width, height := widthImage, heightImage
+	m := resize.Thumbnail(1000, 200, img, resize.Lanczos3)
+	out, err := os.Create("test_resized.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer out.Close()
+
+	// write new image to file
+	jpeg.Encode(out, m, nil)
+
+	newWidth, newHeight := getWidthAndHeight("test_resized.jpg")
+
+	width, height := newWidth, newHeight
 	var pixels [][]pixel
 	for y := 0; y < height; y++ {
 		var row []pixel
@@ -59,12 +73,13 @@ func rgbaToPixel(r uint32, g uint32, b uint32, a uint32) pixel {
 
 func formatMatrix(finalMatrix [][]string, width int, height int) {
 	c := color.New(color.FgGreen).Add(color.Underline)
-	for y := 0; y < width; y++ {
-		for x := 0; x < height; x++ {
+	newWidth, newHeight := getWidthAndHeight("test_resized.jpg")
+	for y := 0; y < newWidth; y++ {
+		for x := 0; x < newHeight; x++ {
 			finalMatrix[x][y] = finalMatrix[x][y] + finalMatrix[x][y] + finalMatrix[x][y]
 		}
 	}
-	c.Println(finalMatrix[0])
+	c.Println(finalMatrix)
 }
 
 func main() {
@@ -73,7 +88,7 @@ func main() {
 	maxPixelVal := 255
 
 	// get path of image via command line
-	flagImagePath := flag.String("path", "none", "Select path of image you want to convert.")
+	flagImagePath := flag.String("path", "/Users/knrt10/Go/src/github.com/knrt10/ascii-cliTool/ascii-pineapple.jpg", "Select path of image you want to convert.")
 	flag.Parse()
 
 	// getting width and height
@@ -92,12 +107,12 @@ func main() {
 	// fmt.Println(pixels)
 
 	// Converting the RGB tuples of pixels into single brightness numbers
-	var brightness [][]int
+	var brightness [][]float64
 	for y := 0; y < len(pixels); y++ {
-		var row []int
+		var row []float64
 		for _, v := range pixels[y] {
-			var sum = 0
-			sum = int(0.21*v.R + 0.72*v.G + 0.07*v.B)
+			var sum = 0.0
+			sum = (0.21*v.R + 0.72*v.G + 0.07*v.B)
 			row = append(row, sum)
 		}
 		brightness = append(brightness, row)
@@ -129,26 +144,30 @@ func main() {
 
 	// Normalizing Matrix
 
-	var normalize [][]int
+	var normalize [][]float64
 	for y := 0; y < len(brightness); y++ {
-		var row []int
+		var row []float64
 		for _, v := range brightness[y] {
-			r := int(maxPixelVal) * (v - min) / int(max-min)
-			row = append(row, int(r))
+			r := float64(maxPixelVal) * (v - min) / (max - min)
+			row = append(row, float64(r))
 		}
 		normalize = append(normalize, row)
 	}
 
+	//fmt.Println(normalize[0])
+
 	// Convert to ascii Characters
 	var finalMatrix [][]string
-	for y := 0; y < len(normalize); y++ {
+	for _, value := range normalize {
 		var row []string
-		for _, v := range normalize[y] {
-			row = append(row, string(asciiChars[int(v/(maxPixelVal)*len(asciiChars))]))
+		for _, v := range value {
+			c := v / float64(maxPixelVal)
+			d := float64(len(asciiChars) - 1)
+			row = append(row, string(asciiChars[int(c*d)]))
 		}
 		finalMatrix = append(finalMatrix, row)
 	}
-
+	//fmt.Println(finalMatrix[0])
 	formatMatrix(finalMatrix, width, height)
 
 }
