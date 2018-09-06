@@ -8,12 +8,14 @@ import (
 	_ "image/png"
 	"io"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 type pixel struct {
-	R int
-	G int
-	B int
+	R float64
+	G float64
+	B float64
 }
 
 // getting width and height of image
@@ -52,10 +54,24 @@ func getAndStorePixels(file io.Reader, widthImage int, heightImage int) ([][]pix
 
 // get rgba values for pixels
 func rgbaToPixel(r uint32, g uint32, b uint32, a uint32) pixel {
-	return pixel{int(r / 257), int(g / 257), int(b / 257)}
+	return pixel{float64(r / 257), float64(g / 257), float64(b / 257)}
+}
+
+func formatMatrix(finalMatrix [][]string, width int, height int) {
+	c := color.New(color.FgGreen).Add(color.Underline)
+	for y := 0; y < width; y++ {
+		for x := 0; x < height; x++ {
+			finalMatrix[x][y] = finalMatrix[x][y] + finalMatrix[x][y] + finalMatrix[x][y]
+		}
+	}
+	c.Println(finalMatrix[0])
 }
 
 func main() {
+
+	asciiChars := "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+	maxPixelVal := 255
+
 	// get path of image via command line
 	flagImagePath := flag.String("path", "none", "Select path of image you want to convert.")
 	flag.Parse()
@@ -81,11 +97,58 @@ func main() {
 		var row []int
 		for _, v := range pixels[y] {
 			var sum = 0
-			sum = (v.R + v.B + v.G) / 3
+			sum = int(0.21*v.R + 0.72*v.G + 0.07*v.B)
 			row = append(row, sum)
 		}
 		brightness = append(brightness, row)
 	}
 
 	// fmt.Println(brightness)
+
+	// calculating max Value
+	max := brightness[0][0]
+	min := brightness[0][0]
+	for _, value := range brightness {
+		for _, k := range value {
+			if k > max {
+				max = k
+			}
+		}
+	}
+
+	// calculating min value
+	for _, value := range brightness {
+		for _, k := range value {
+			if k < min {
+				min = k
+			}
+		}
+	}
+
+	// fmt.Println(max, min)
+
+	// Normalizing Matrix
+
+	var normalize [][]int
+	for y := 0; y < len(brightness); y++ {
+		var row []int
+		for _, v := range brightness[y] {
+			r := int(maxPixelVal) * (v - min) / int(max-min)
+			row = append(row, int(r))
+		}
+		normalize = append(normalize, row)
+	}
+
+	// Convert to ascii Characters
+	var finalMatrix [][]string
+	for y := 0; y < len(normalize); y++ {
+		var row []string
+		for _, v := range normalize[y] {
+			row = append(row, string(asciiChars[int(v/(maxPixelVal)*len(asciiChars))]))
+		}
+		finalMatrix = append(finalMatrix, row)
+	}
+
+	formatMatrix(finalMatrix, width, height)
+
 }
