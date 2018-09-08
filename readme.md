@@ -7,16 +7,35 @@
 ## Installation
 
 ```
-go get github.com/knrt10/ascii-art-cli
+go get github.com/knrt10/asciiConvert
 ```
 
 ## Usage
 
-```
-./main -path "/path to image.jpg(png)" -w 200
+`asciiConvert --help` 
 
--path path of your picture
--w width of output // default is 100
+```
+Usage:
+  asciiConvert [flags]
+
+Flags:
+  -h, --help          help for asciiArt
+  -p, --path string   path of your file for which you want to convert ASCII Art
+  -w, --width int     width of final file (default 100)
+```
+
+## Command
+
+```
+asciiConvert -p "path to file" // this will print with width 100
+
+or
+
+asciiConvert -p "path to file" -w 150
 ```
 
 ## Preview
+![preview](https://user-images.githubusercontent.com/24803604/45258693-a4dca980-b3d9-11e8-9935-aa33646a16e6.gif)
+
+
+

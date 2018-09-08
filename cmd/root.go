@@ -66,11 +66,12 @@ func getHeight(img image.Image, w int) (image.Image, int, int) {
 }
 
 var widthFlag int
+var path string
 
 var rootCmd = &cobra.Command{
-	Use:   "asciiArt",
+	Use:   "asciiConvert",
 	Short: "AscII CLI",
-	Long:  `This is a terminal client to create ASCII art from any image built with love by knrt10 in an effort to learn Go`,
+	Long:  `This is a terminal client to create ASCII art from any image, built with love by knrt10 in an effort to learn Go`,
 	Run: func(cmd *cobra.Command, args []string) {
 		path := cmd.Flag("path").Value.String()
 		image, width := getWidthAndImage(path, int(widthFlag))
