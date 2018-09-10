@@ -7,7 +7,6 @@ import (
 	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
-	"log"
 	"os"
 	"reflect"
 
@@ -32,10 +31,10 @@ func getWidthAndImage(imagePath string, width int) (image.Image, int) {
 
 	img, _, err := image.Decode(file)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
-	file.Close()
+	defer file.Close()
 	return img, width
 }
 
