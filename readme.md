@@ -38,4 +38,5 @@ asciiConvert -p "path to file" -w 150
 ![preview](https://user-images.githubusercontent.com/24803604/45258693-a4dca980-b3d9-11e8-9935-aa33646a16e6.gif)
 
 
+Enjoy :v:
 
