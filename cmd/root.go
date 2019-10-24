@@ -122,12 +122,23 @@ func displayGif(file *os.File, width int) {
 		os.Exit(1)
 	}
 
-	for i, frame := range gifImg.Image {
-		frameImage := frame.SubImage(frame.Rect)
-		// To clear the shell
-		fmt.Println("\033[2J")
-		fmt.Printf("%s", asciiArt(getHeight(frameImage, width)))
-		time.Sleep(time.Duration((time.Second * time.Duration(gifImg.Delay[i])) / 100))
+	loopCount := 0
+	for {
+		for i, frame := range gifImg.Image {
+			frameImage := frame.SubImage(frame.Rect)
+			// To clear the shell
+			fmt.Println("\033[2J")
+			fmt.Printf("%s", asciiArt(getHeight(frameImage, width)))
+			time.Sleep(time.Duration((time.Second * time.Duration(gifImg.Delay[i])) / 100))
+		}
+		// If gif is infinite loop
+		if gifImg.LoopCount == 0 {
+			continue
+		}
+		loopCount++
+		if loopCount == gifImg.LoopCount {
+			break
+		}
 	}
 
 }
