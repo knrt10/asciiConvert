@@ -10,6 +10,11 @@
 go get github.com/knrt10/asciiConvert
 ```
 
+## Features
+
+- Get images ascii Art
+- GIF support
+
 ## Usage
 
 `asciiConvert --help` 
@@ -37,5 +42,11 @@ asciiConvert -p "path to file" -w 150
 ## Preview
 ![preview](https://user-images.githubusercontent.com/24803604/45258693-a4dca980-b3d9-11e8-9935-aa33646a16e6.gif)
 
+## GIF support 
 
+![preview](https://user-images.githubusercontent.com/22731013/67517637-a1c97900-f6c0-11e9-8da7-c5cf93261b44.gif)
 
+## Contributors
+
+- [@knrt10](https://github.com/knrt10)
+- [@S Santosh Nagaraj](https://github.com/yolossn)
