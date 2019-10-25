@@ -3,3 +3,4 @@ test.py
 test_resized.jpg
 .vscode/*
 main
+*.gif

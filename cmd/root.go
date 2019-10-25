@@ -1,15 +1,20 @@
 package cmd
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"image"
 	"image/color"
+	"image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"time"
+
 	"os"
 	"reflect"
 
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/nfnt/resize"
 	"github.com/spf13/cobra"
 )
@@ -72,11 +77,70 @@ var rootCmd = &cobra.Command{
 	Short: "AscII CLI",
 	Long:  `This is a terminal client to create ASCII art from any image, built with love by knrt10 in an effort to learn Go`,
 	Run: func(cmd *cobra.Command, args []string) {
-		path := cmd.Flag("path").Value.String()
-		image, width := getWidthAndImage(path, int(widthFlag))
-		finalASCIIArt := asciiArt(getHeight(image, width))
-		fmt.Println(string(finalASCIIArt))
+		display(path, int(widthFlag))
 	},
+}
+
+func display(path string, width int) {
+
+	_, extension, err := mimetype.DetectFile(path)
+	if err != nil {
+		fmt.Println("Error finding type of file,\n Error:", err.Error())
+		os.Exit(1)
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Couldn't open file,\n Error:", err.Error())
+		os.Exit(1)
+	}
+
+	if extension == "gif" {
+		displayGif(file, width)
+	} else {
+		displayImage(file, width)
+	}
+}
+
+func displayImage(file *os.File, width int) {
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		fmt.Println("Couldn't decode image,\nError:", err.Error())
+		os.Exit(1)
+	}
+
+	finalASCIIArt := asciiArt(getHeight(img, width))
+	fmt.Println(string(finalASCIIArt))
+}
+
+func displayGif(file *os.File, width int) {
+
+	gifImg, err := gif.DecodeAll(bufio.NewReader(file))
+	if err != nil {
+		fmt.Println("Couldn't decode image,\nError:", err.Error())
+		os.Exit(1)
+	}
+
+	loopCount := 0
+	for {
+		for i, frame := range gifImg.Image {
+			frameImage := frame.SubImage(frame.Rect)
+			// To clear the shell
+			fmt.Println("\033[2J")
+			fmt.Printf("%s", asciiArt(getHeight(frameImage, width)))
+			time.Sleep(time.Duration((time.Second * time.Duration(gifImg.Delay[i])) / 100))
+		}
+		// If gif is infinite loop
+		if gifImg.LoopCount == 0 {
+			continue
+		}
+		loopCount++
+		if loopCount == gifImg.LoopCount {
+			break
+		}
+	}
+
 }
 
 func Execute() {
